@@ -1,4 +1,8 @@
 /**
+ * Connect to a Google Jacquard jacket via Web Bluetooth.
+ * Receive analog data from the conductive lines in the sleeve
+ * and get the LED button to show a defined pattern.
+ * 
  * @author Alan Ross
  * @version 0.1
  */
@@ -109,7 +113,7 @@ function JacquardController()
         _ledPatternCharacteristic = null;
         _analogCharacteristic = null;
 
-        _onDisconnected()
+        _onDisconnected();
     }
 
     /**
