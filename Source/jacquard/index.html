@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="language" content="en"/>
+    <title>Google Jacquard</title>
+    <style>
+        button, textarea {
+            margin: 0 0 20px 0;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<h1>Google Jacquard</h1>
+<button id="button">Connect</button>
+<textarea id="output" rows="12" cols="80"></textarea>
+<p>Status: <span id="status">Ready to connect</span></p>
+<p>
+    Help:<br/>
+    1. Make sure Chrome is up to date.<br/>
+    2. Web-bluetooth must be enabled: (In chrome://flags enable "Experimental Extension APIs")<br/>
+    3. Click the connect button above to pair the jacket, then touch the interactive sleeve.<br/>
+    <br/>
+    <a href="https://github.com/alanross/google-jacquard">Source</a> -
+    <a href="https://atap.google.com/jacquard/">Google Jacquard Jacket</a>
+</p>
+
+<script src="jacquard.js"></script>
+<script>
+
+    const button = document.getElementById( "button" );
+    const status = document.getElementById( "status" );
+    const output = document.getElementById( "output" );
+
+    const buffer = [];
+
+    if( 'bluetooth' in navigator === false )
+    {
+        button.style.display = "none";
+        status.innerHTML = "This browser doesn't support the Web Bluetooth API :(";
+    }
+
+    button.addEventListener( "click", function()
+    {
+        status.innerHTML = "Scanning for jacket";
+
+        let controller = new JacquardController();
+
+        controller.connect().then( function()
+        {
+            status.innerHTML = "Connected";
+
+            controller.setLEDPattern( 16, 4 );
+            controller.onAnalogInput( function( data )
+            {
+                buffer.unshift( "Proximity: " + data.proximity + "\t Lines: " + data.lines.join( "\t" ) );
+                buffer.length = 10;
+
+                output.textContent = buffer.join( "\n" );
+                output.scrollTop = 0;
+            } );
+            controller.onDisconnected( function()
+            {
+                status.innerHTML = "Disconnected";
+            } );
+        } ).catch( function( error )
+        {
+            status.innerHTML = "Error: " + error;
+        } );
+    } );
+</script>
+</body>
+</html>
